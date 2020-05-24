@@ -64,6 +64,7 @@ class Parser //:dParser.Form1
     string addop = "";
     string term1 = "";
     string term2 = "";
+    string comp = "";
        
     Queue<TokenRec> tokenQueue = new Queue<TokenRec>();
 
@@ -273,19 +274,48 @@ class Parser //:dParser.Form1
         {
 
             Match(currentToken.Token_Type, currentToken);
-            string comp = currentToken.getTokenValue();
+             comp = currentToken.getTokenValue();
             geti();
             test.Nodes[0].Nodes[i].Nodes.Add(comp);
             TokenRec nextToken = tokenQueue.Dequeue();
-            getj();
-            test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
-            getk();
+            //lw fe addop rag3a b3d comp
+            if (addop == "+" || addop == "-" || addop == "*" || addop == "/")
+            {
+                getj();
 
-            test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
+                getk();
 
-            test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
+
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
+            }
+            else //lw mfe4 addop rag3a bs fe comp
+            {
+                getj();
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
+            }
 
             currentToken = simpleExp(nextToken);
+            //lw fe addop tanya 8er l addop al ola wfe comp 
+            if (currentToken != null && comp != null)
+            {
+                if (addop == "+" || addop == "-" || addop == "*" || addop == "/")
+                { 
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
+                getk();
+
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
+
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
+                }
+            }
+            //lw mfe4 addop rag3a wfe comp da l term l tany
+            if(addop != "+" && addop != "-" && addop != "*" && addop != "/" )
+            {
+                term2 = nextToken.getTokenValue();
+                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term2);
+            }
 
 
         }
@@ -315,7 +345,20 @@ class Parser //:dParser.Form1
              term2 = nextToken.getTokenValue();
 
             currentToken = term(nextToken);
-   
+
+               string comp2 = currentToken.getTokenValue();
+            // lw fe addop wmfe4 comp 
+            if (comp2 != "<" && comp2 != ">" && comp2 != "="  && comp2 != "" && addop != null)
+            {
+                if (comp != "<" && comp != ">" && comp != "=" || comp == "" ) {
+                    geti();
+                    test.Nodes[0].Nodes[i].Nodes.Add(addop);
+                    getj();
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term2);
+                }
+            }
+
         }
 
         return currentToken;

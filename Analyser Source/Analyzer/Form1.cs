@@ -15,9 +15,10 @@ using System.Windows.Forms;
 
 namespace dParser
 {
+   
     public partial class Form1 : Form
     {
-
+        Token scanner = new Token();
 
         Parser parser;
        
@@ -36,14 +37,15 @@ namespace dParser
         {
             var str = richTextBox1.Text;
 
-            Token scanner = new Token();
+            
             scanner.getToken(str);
+            int sca =scanner.getsc();
             richTextBox2.Text = scanner.slicer(scanner.GetText());
 
             parser = new Parser(scanner.getTokenQueue());
             parser.gettree(ref treeView1);
 
-            parser.parse();
+            parser.parse(sca);
             
 
 
@@ -59,24 +61,30 @@ namespace dParser
    
     }
 }
-class Parser //:dParser.Form1
+class Parser :dParser.Form1
 {
+    //Form1 ff = new Form1();
+    
+   //Token scann = new Token();
+    
+    int i = -1, j = -1, k = -1 , h = -1;
     string addop = "";
     string term1 = "";
     string term2 = "";
     string comp = "";
-       
+    int sc;
     Queue<TokenRec> tokenQueue = new Queue<TokenRec>();
 
     public Parser(Queue<TokenRec> tokenQueue)
     {
         this.tokenQueue = tokenQueue;
     }
-    public void parse()
+    public void parse(int sca)
     {
+        //int sc;
+        this.sc = sca;
 
-
-       string s = "Program 0";
+       string s = "Program ";
        test.Nodes.Add(s);
         //test.Nodes[0].Nodes.Add("1");
         //test.Nodes[0].Nodes[0].Nodes.Add("2");
@@ -96,43 +104,60 @@ class Parser //:dParser.Form1
 
     private TokenRec stmtSequence()
     {
+      //  while (tokenQueue.Count != 0)
+      //  {
             TokenRec currentToken = tokenQueue.Dequeue();
-        Console.WriteLine(currentToken.Token_Type);
-        currentToken = statement(currentToken);
+            Console.WriteLine(currentToken.Token_Type);
+            currentToken = statement(currentToken);
+            while (sc > 1){
+                while (tokenQueue.Count != 0 && currentToken.Token_Type == TokenRec.TokenType.SEMICOLON)
+                {
+                    Match(TokenRec.TokenType.SEMICOLON, currentToken);
 
-        while (tokenQueue.Count != 0 && currentToken.Token_Type == TokenRec.TokenType.SEMICOLON)
-        {
-            Match(TokenRec.TokenType.SEMICOLON, currentToken);
-            
+                    // string sc = currentToken.getTokenValue();
+                    //i = 0;
+                    j = -1;
+                    k = -1;
+                    h = -1;
 
-            currentToken = tokenQueue.Dequeue();
+                    //  int sc = scanner.getsc();
 
-
-        }
+                    currentToken = tokenQueue.Dequeue();
+                    currentToken = statement(currentToken);
+                 sc--;
+                }
+            }
+             //sc--;
+           /*  while (sc > 1)
+               {
+                currentToken = statement(currentToken);
+                currentToken = tokenQueue.Dequeue();
+                }
+                */
         if (tokenQueue.Count != 0)
-        {
-            if (currentToken.Token_Type == TokenRec.TokenType.ELSE)
             {
-                return currentToken;
+                if (currentToken.Token_Type == TokenRec.TokenType.ELSE)
+                {
+                    return currentToken;
+                }
+                else if (currentToken.Token_Type == TokenRec.TokenType.UNTIL)
+                {
+                    Console.WriteLine(currentToken.getTokenValue());
+                    return currentToken;
+                }
+                else
+                {
+                    Console.WriteLine(currentToken.getTokenValue());
+                    return statement(currentToken);
+                }
             }
-            else if (currentToken.Token_Type == TokenRec.TokenType.UNTIL)
-            {
-                Console.WriteLine(currentToken.getTokenValue());
-                return currentToken;
-            }
+
             else
             {
                 Console.WriteLine(currentToken.getTokenValue());
-                return statement(currentToken);
+                return currentToken;
             }
-        }
-
-        else
-        {
-            Console.WriteLine(currentToken.getTokenValue());
-            return currentToken;
-        }
-
+     //   }
     }
     TokenRec statement(TokenRec currentToken)
     {
@@ -156,6 +181,7 @@ class Parser //:dParser.Form1
 
 
             default:
+                Console.WriteLine(currentToken.getTokenValue());
                 throw new SystemException("Invalid statement found.");
 
         }
@@ -165,9 +191,19 @@ class Parser //:dParser.Form1
 
     private TokenRec readStmt(TokenRec currentToken)
     {
+        string rd;
+        rd = currentToken.getTokenValue();
+        geti();
+        test.Nodes[0].Nodes.Add(rd);
+
 
         Match(TokenRec.TokenType.READ, currentToken);
         currentToken = tokenQueue.Dequeue();
+        string id;
+        id = currentToken.getTokenValue();
+        geti();
+        test.Nodes[0].Nodes.Add(id);
+        //i = 1;
         Console.WriteLine(currentToken.Token_Type);
 
         Match(TokenRec.TokenType.IDENTIFIER, currentToken);
@@ -275,49 +311,51 @@ class Parser //:dParser.Form1
 
             Match(currentToken.Token_Type, currentToken);
              comp = currentToken.getTokenValue();
-            geti();
-            test.Nodes[0].Nodes[i].Nodes.Add(comp);
-            TokenRec nextToken = tokenQueue.Dequeue();
-            //lw fe addop rag3a b3d comp
-            if (addop == "+" || addop == "-" || addop == "*" || addop == "/")
+            if (comp != "=")
             {
-                getj();
-
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
-                getk();
-
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
-
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
-            }
-            else //lw mfe4 addop rag3a bs fe comp
-            {
-                getj();
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
-            }
-
-            currentToken = simpleExp(nextToken);
-            //lw fe addop tanya 8er l addop al ola wfe comp 
-            if (currentToken != null && comp != null)
-            {
+                geti();
+                test.Nodes[0].Nodes[i].Nodes.Add(comp);
+                TokenRec nextToken = tokenQueue.Dequeue();
+                //lw fe addop rag3a b3d comp
                 if (addop == "+" || addop == "-" || addop == "*" || addop == "/")
-                { 
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
-                getk();
+                {
+                    getj();
 
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
+                    getk();
 
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
+
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
                 }
-            }
-            //lw mfe4 addop rag3a wfe comp da l term l tany
-            if(addop != "+" && addop != "-" && addop != "*" && addop != "/" )
-            {
-                term2 = nextToken.getTokenValue();
-                test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term2);
-            }
+                else //lw mfe4 addop rag3a bs fe comp
+                {
+                    getj();
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
+                }
 
+                currentToken = simpleExp(nextToken);
+                //lw fe addop tanya 8er l addop al ola wfe comp 
+                if (currentToken != null && comp != null)
+                {
+                    if (addop == "+" || addop == "-" || addop == "*" || addop == "/")
+                    {
+                        test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(addop);
+                        getk();
 
+                        test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term1);
+
+                        test.Nodes[0].Nodes[i].Nodes[j].Nodes[k].Nodes.Add(term2);
+                    }
+                }
+                //lw mfe4 addop rag3a wfe comp da l term l tany
+                if (addop != "+" && addop != "-" && addop != "*" && addop != "/")
+                {
+                    term2 = nextToken.getTokenValue();
+                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term2);
+                }
+
+            }
         }
         return currentToken;
 
@@ -348,17 +386,18 @@ class Parser //:dParser.Form1
 
                string comp2 = currentToken.getTokenValue();
             // lw fe addop wmfe4 comp 
-            if (comp2 != "<" && comp2 != ">" && comp2 != "="  && comp2 != "" && addop != null)
-            {
-                if (comp != "<" && comp != ">" && comp != "=" || comp == "" ) {
-                    geti();
-                    test.Nodes[0].Nodes[i].Nodes.Add(addop);
-                    getj();
-                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
-                    test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term2);
+            if (addop == "+") { 
+                if (comp2 != "<" && comp2 != ">" && comp2 != "="  && comp2 != "" && addop != null)
+                {
+                    if (comp != "<" && comp != ">" && comp != "=" || comp == "" ) {
+                        geti();
+                        test.Nodes[0].Nodes[i].Nodes.Add(addop);
+                        getj();
+                        test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
+                        test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term2);
+                    }
                 }
             }
-
         }
 
         return currentToken;
@@ -367,22 +406,36 @@ class Parser //:dParser.Form1
 
     private TokenRec term(TokenRec currentToken)
     {
-        currentToken = factor(currentToken);
-
+        //string numalone;
+        //numalone = currentToken.getTokenValue();
+        currentToken = factor(currentToken);////////////
+        string numaloneflag;
+        numaloneflag = currentToken.getTokenValue();
+        if (numaloneflag != "*" && numaloneflag == ";" && addop != "+" && comp != "<" && comp != ">")
+        {
+            geti();
+            test.Nodes[0].Nodes[i].Nodes.Add(term1);
+        }
 
 
         while (tokenQueue.Count != 0 && currentToken.Token_Type == TokenRec.TokenType.MULOP)
         {
             Console.WriteLine(currentToken.getTokenValue());
-           
+            string mulop = currentToken.getTokenValue();
+            geti();
+            test.Nodes[0].Nodes[i].Nodes.Add(mulop);
+            getj();
+            test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(term1);
             Match(currentToken.Token_Type, currentToken);
          
             TokenRec nextToken = tokenQueue.Dequeue();
 
 
 
+            string mul2f = nextToken.getTokenValue();
             currentToken = factor(nextToken);
-
+            test.Nodes[0].Nodes[i].Nodes[j].Nodes.Add(mul2f);
+            //term2 for 2
         }
         return currentToken;
 
@@ -464,7 +517,7 @@ class Parser //:dParser.Form1
 
 
 
-     int  i = -1,j = -1,k = -1,h = -1;
+ 
      public void geti()
     {
         i++;

@@ -9,6 +9,7 @@ namespace Scanner
 {
     class Token
     {
+        int sc = 0;
 
         Queue<TokenRec> tokenQueue = new Queue<TokenRec>();
 
@@ -309,7 +310,7 @@ namespace Scanner
                                     text += (txt[i] + ": T_semicolon~");
 
 
-
+                                    sc++;
 
 
                                 }
@@ -691,7 +692,10 @@ namespace Scanner
         {
             return text;
         }
-
+        public int getsc()
+        {
+            return sc;
+        }
 
     }
 
